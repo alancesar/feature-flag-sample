@@ -7,3 +7,8 @@
 ```shell
 docker-compose up --build
 ```
+
+## Find feature flag code smell
+```shell
+make grep
+```
