@@ -10,15 +10,21 @@ import (
 )
 
 type (
+	Cache interface {
+		Get(ctx context.Context, key string) ([]byte, error)
+		Set(ctx context.Context, key string, value []byte) error
+	}
+
 	GrowthBookService struct {
 		endpoint string
-		features growthbook.FeatureMap
+		cache    Cache
 	}
 )
 
-func NewGrowthBookService(endpoint string) *GrowthBookService {
+func NewGrowthBookService(endpoint string, cache Cache) *GrowthBookService {
 	return &GrowthBookService{
 		endpoint: endpoint,
+		cache:    cache,
 	}
 }
 
@@ -42,15 +48,16 @@ func (s *GrowthBookService) fetchFeatureMap() ([]byte, error) {
 }
 
 func (s *GrowthBookService) getFeatures() (growthbook.FeatureMap, error) {
-	if s.features == nil {
-		featureMap, err := s.fetchFeatureMap()
+	featureMap, err := s.cache.Get(context.TODO(), "features")
+	if err != nil {
+		fmt.Println("while fetching cache:", err)
+		featureMap, err = s.fetchFeatureMap()
 		if err != nil {
 			return nil, err
 		}
-		s.features = growthbook.ParseFeatureMap(featureMap)
 	}
 
-	return s.features, nil
+	return growthbook.ParseFeatureMap(featureMap), nil
 }
 
 func (s *GrowthBookService) Eval(ctx context.Context, name string) bool {
@@ -76,7 +83,10 @@ func (s *GrowthBookService) Refresh() error {
 		return err
 	}
 
-	s.features = growthbook.ParseFeatureMap(featureMap)
+	if err := s.cache.Set(context.TODO(), "features", featureMap); err != nil {
+		return err
+	}
+
 	fmt.Println("features loaded successfully:", string(featureMap))
 	return nil
 }

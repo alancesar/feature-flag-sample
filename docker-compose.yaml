@@ -18,10 +18,17 @@ services:
       - MONGODB_URI=mongodb://root:password@mongo:27017/growthbook?authSource=admin
     volumes:
       - uploads:/usr/local/src/app/packages/back-end/uploads
+  redis:
+    image: "redis:7.2.3"
+    ports:
+      - "6379:6379"
   develop:
     build:
       context: .
       dockerfile: Dockerfile
+    depends_on:
+      - growthbook
+      - redis
     env_file:
       - develop.env
     ports:
@@ -30,6 +37,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    depends_on:
+      - growthbook
+      - redis
     env_file:
       - production.env
     ports:
