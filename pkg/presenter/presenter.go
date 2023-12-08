@@ -1,7 +1,5 @@
 package presenter
 
-import "time"
-
 type (
 	Response struct {
 		ClientID  string `json:"client_id,omitempty"`
@@ -11,7 +9,7 @@ type (
 
 	ResponseV2 struct {
 		Response
-		Timestamp int64 `json:"timestamp"`
+		Message string `json:"message"`
 	}
 )
 
@@ -30,6 +28,6 @@ func NewResponseV2(response Response) ResponseV2 {
 			UserAgent: response.UserAgent,
 			Version:   2,
 		},
-		Timestamp: time.Now().Unix(),
+		Message: "looks like the feature flag is on",
 	}
 }
