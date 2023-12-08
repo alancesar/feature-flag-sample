@@ -21,8 +21,8 @@ type (
 func Home(handler FeatureFlagHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		payload := presenter.NewResponse(
-			r.Header.Get("User-Agent"),
 			r.Header.Get("Client-ID"),
+			r.Header.Get("User-Agent"),
 		)
 
 		if handler.Eval(r.Context(), "payload-v2") {
