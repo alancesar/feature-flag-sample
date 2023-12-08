@@ -9,6 +9,10 @@ import (
 	"net/http"
 )
 
+const (
+	featuresKey = "features"
+)
+
 type (
 	Cache interface {
 		Get(ctx context.Context, key string) ([]byte, error)
@@ -48,12 +52,15 @@ func (s *GrowthBookService) fetchFeatureMap() ([]byte, error) {
 }
 
 func (s *GrowthBookService) getFeatures() (growthbook.FeatureMap, error) {
-	featureMap, err := s.cache.Get(context.TODO(), "features")
+	featureMap, err := s.cache.Get(context.TODO(), featuresKey)
 	if err != nil {
 		fmt.Println("while fetching cache:", err)
 		featureMap, err = s.fetchFeatureMap()
 		if err != nil {
 			return nil, err
+		}
+		if err := s.cache.Set(context.TODO(), featuresKey, featureMap); err != nil {
+			fmt.Println(err)
 		}
 	}
 
@@ -67,10 +74,17 @@ func (s *GrowthBookService) Eval(ctx context.Context, name string) bool {
 		return false
 	}
 
+	clientID := ""
+	ctxClientID := ctx.Value("client-id")
+	if ctxClientID != nil {
+		clientID = ctxClientID.(string)
+	}
+
+	fmt.Println("evaluating", name, "for", clientID)
 	growthBookContext := growthbook.NewContext().
 		WithFeatures(features).
 		WithAttributes(growthbook.Attributes{
-			"client-id": ctx.Value("client-id").(string),
+			"client-id": clientID,
 		})
 
 	gb := growthbook.New(growthBookContext)
@@ -83,7 +97,7 @@ func (s *GrowthBookService) Refresh() error {
 		return err
 	}
 
-	if err := s.cache.Set(context.TODO(), "features", featureMap); err != nil {
+	if err := s.cache.Set(context.TODO(), featuresKey, featureMap); err != nil {
 		return err
 	}
 
