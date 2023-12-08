@@ -20,8 +20,14 @@ type (
 
 func Home(handler FeatureFlagHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		clientID := ""
+		ctxClientID := r.Context().Value("client-id")
+		if ctxClientID != nil {
+			clientID = ctxClientID.(string)
+		}
+
 		payload := presenter.NewResponse(
-			r.Header.Get("Client-ID"),
+			clientID,
 			r.Header.Get("User-Agent"),
 		)
 
