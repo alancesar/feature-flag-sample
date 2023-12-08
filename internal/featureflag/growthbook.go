@@ -7,6 +7,7 @@ import (
 	"github.com/growthbook/growthbook-golang"
 	"log"
 	"net/http"
+	"poc-growthbook/pkg/tracing"
 )
 
 const (
@@ -74,13 +75,7 @@ func (s *GrowthBookService) Eval(ctx context.Context, name string) bool {
 		return false
 	}
 
-	clientID := ""
-	ctxClientID := ctx.Value("client-id")
-	if ctxClientID != nil {
-		clientID = ctxClientID.(string)
-	}
-
-	fmt.Println("evaluating", name, "for", clientID)
+	clientID := tracing.GetClientIDFromContext(ctx)
 	growthBookContext := growthbook.NewContext().
 		WithFeatures(features).
 		WithAttributes(growthbook.Attributes{

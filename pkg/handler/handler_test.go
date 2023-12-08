@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"poc-growthbook/pkg/tracing"
 	"reflect"
 	"testing"
 )
@@ -52,7 +53,7 @@ func TestHome(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			req.Header.Set("User-Agent", "httptest")
 			req.Header.Set("Client-ID", "some-client")
-			req = req.WithContext(context.WithValue(context.Background(), "client-id", "some-client"))
+			req = req.WithContext(tracing.SetClientIDInContext(req.Context(), "some-client"))
 			w := httptest.NewRecorder()
 
 			Home(tt.args.handler).ServeHTTP(w, req)

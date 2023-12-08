@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
+	"poc-growthbook/pkg/tracing"
 )
 
 type (
@@ -14,8 +14,7 @@ type (
 func InjectUserData(next http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		clientID := r.Header.Get("Client-ID")
-		ctx := context.WithValue(r.Context(), "client-id", clientID)
-		r = r.WithContext(ctx)
+		r = r.WithContext(tracing.SetClientIDInContext(r.Context(), clientID))
 		next.ServeHTTP(w, r)
 	})
 }

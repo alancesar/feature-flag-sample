@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"poc-growthbook/pkg/presenter"
+	"poc-growthbook/pkg/tracing"
 )
 
 type (
@@ -20,12 +21,7 @@ type (
 
 func Home(handler FeatureFlagHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		clientID := ""
-		ctxClientID := r.Context().Value("client-id")
-		if ctxClientID != nil {
-			clientID = ctxClientID.(string)
-		}
-
+		clientID := tracing.GetClientIDFromContext(r.Context())
 		payload := presenter.NewResponse(
 			clientID,
 			r.Header.Get("User-Agent"),
