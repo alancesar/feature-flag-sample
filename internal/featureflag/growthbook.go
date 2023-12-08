@@ -101,6 +101,5 @@ func (s *GrowthBookService) Refresh() error {
 		return err
 	}
 
-	fmt.Println("features loaded successfully:", string(featureMap))
 	return nil
 }
