@@ -61,7 +61,7 @@ func (s *GrowthBookService) getFeatures() (growthbook.FeatureMap, error) {
 			return nil, err
 		}
 		if err := s.cache.Set(context.TODO(), featuresKey, featureMap); err != nil {
-			fmt.Println(err)
+			fmt.Println("while saving in cache:", err)
 		}
 	}
 
